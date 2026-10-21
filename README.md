@@ -32,9 +32,11 @@ Monitors ARP traffic on a given network interface, maintains a reference ARP tab
 ## 🚀 Installation
 
 ```bash
-git clone https://github.com/salemkora/arp-detector
-cd arp-detector
-pip install -r requirements.txt
+git clone https://github.com/LazyWolf-007/CN_Project_ARP-detector.git
+cd CN_Project_ARP-detector
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
 > ⚠️ Requires Python 3.8+ and root/sudo privileges (raw socket capture).
