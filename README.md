@@ -113,5 +113,5 @@ For **educational and legal use only**. Only run on networks you own or have exp
 
 ## 👤 Author
 
-**Salem KORA** — Bachelor Cybersécurité & Ethical Hacking, EFREI Bordeaux  
-[GitHub](https://github.com/salemkora) · [LinkedIn](https://linkedin.com/in/salemkora)
+Author / Maintainer: Tejas Pawar
+Based on: Salem KORA's original project for references. 
