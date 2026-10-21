@@ -45,10 +45,27 @@ def parse_args():
     return parser.parse_args()
 
 
+
 def check_root():
-    if os.geteuid() != 0:
-        print("[!] This tool requires root privileges. Run with sudo.")
-        sys.exit(1)
+    """Check whether the process has elevated privileges."""
+    import os
+    import sys
+
+    if os.name == "nt":
+        try:
+            import ctypes
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+        except Exception:
+            is_admin = False
+    else:
+        is_admin = hasattr(os, "geteuid") and os.geteuid() == 0
+
+    if not is_admin:
+        print(
+            "Warning: Not running with elevated privileges. "
+            "Packet capture may fail."
+        )
+
 
 
 def main():

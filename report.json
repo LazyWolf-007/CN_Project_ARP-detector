@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-10-21T06:46:20.686081",
+  "interface": "\\Device\\NPF_{D5649058-3E16-46AF-853A-66097B55776D}",
+  "duration_seconds": 174,
+  "statistics": {
+    "packets_seen": 0,
+    "hosts_seen": 0,
+    "alerts_count": 0
+  },
+  "arp_table": {},
+  "incidents": []
+}
