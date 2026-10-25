@@ -11,7 +11,7 @@ The project supports two workflows:
 📊 Terminal Dashboard — Example Output
 
 The detector provides a terminal dashboard for monitoring ARP traffic, maintaining IP-to-MAC reference mappings, and reporting potential conflicts.
-
+```
 +-----------------------------------------------------------------------+
 |                       ARP SPOOFING DETECTOR                           |
 |                         SIMULATION MODE                               |
@@ -35,7 +35,7 @@ The detector provides a terminal dashboard for monitoring ARP traffic, maintaini
 | [SIMULATION] Initial mapping recorded                                 |
 | [SIMULATION] Conflicting mapping detected                             |
 +-----------------------------------------------------------------------+
-
+```
 Note: This is an illustrative dashboard representation. The incident is generated using synthetic ARP packet objects locally; no spoofed packets are transmitted onto the network
 ## Features
 
