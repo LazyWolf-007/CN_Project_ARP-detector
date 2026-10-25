@@ -10,32 +10,33 @@ The project supports two workflows:
 
 📊 Terminal Dashboard — Example Output
 
-The detector provides a terminal dashboard for monitoring observed ARP traffic, maintaining IP-to-MAC reference mappings, and displaying potential conflicts.
+The detector provides a terminal dashboard for monitoring ARP traffic, maintaining IP-to-MAC reference mappings, and reporting potential conflicts.
 
-╔══════════════════════════ ARP SPOOFING DETECTOR ══════════════════════════╗
-║                            SIMULATION MODE                               ║
-╠═══════════════════════════════════════════════════════════════════════════╣
-║ ARP TABLE (REFERENCE)                         STATISTICS                  ║
-║                                                                           ║
-║ IP Address       MAC Address                 Interface: SIMULATION        ║
-║ 198.51.100.10    02:00:00:00:00:01           Mode: SIMULATION             ║
-║                                               ARP Packets: 2              ║
-║                                               Hosts: 1                    ║
-║                                               Alerts: 1                   ║
-╠═══════════════════════════════════════════════════════════════════════════╣
-║ DETECTED INCIDENTS                                                        ║
-║                                                                           ║
-║ IP:          198.51.100.10                                                ║
-║ Known MAC:   02:00:00:00:00:01                                            ║
-║ Observed MAC:02:00:00:00:00:02                                            ║
-║ Type:        Potential IP/MAC Conflict                                    ║
-╠═══════════════════════════════════════════════════════════════════════════╣
-║ ARP PACKET LOG                                                            ║
-║ [SIMULATION] Initial mapping recorded                                     ║
-║ [SIMULATION] Conflicting mapping detected                                ║
-╚═══════════════════════════════════════════════════════════════════════════╝
++-----------------------------------------------------------------------+
+|                       ARP SPOOFING DETECTOR                           |
+|                         SIMULATION MODE                               |
++--------------------------------------+--------------------------------+
+| ARP TABLE (REFERENCE)                | STATISTICS                     |
+|                                      |                                |
+| IP Address      MAC Address          | Interface: SIMULATION          |
+| 198.51.100.10   02:00:00:00:00:01    | Mode: SIMULATION               |
+|                                      | ARP Packets: 2                 |
+|                                      | Hosts: 1                       |
+|                                      | Alerts: 1                      |
++--------------------------------------+--------------------------------+
+| DETECTED INCIDENTS                                                    |
+|                                                                       |
+| IP:           198.51.100.10                                           |
+| Known MAC:    02:00:00:00:00:01                                       |
+| Observed MAC: 02:00:00:00:00:02                                       |
+| Type:         Potential IP/MAC Conflict                               |
++-----------------------------------------------------------------------+
+| ARP PACKET LOG                                                        |
+| [SIMULATION] Initial mapping recorded                                 |
+| [SIMULATION] Conflicting mapping detected                             |
++-----------------------------------------------------------------------+
 
-Note: This is a text illustration of the dashboard, not a literal terminal screenshot. The example incident is generated using synthetic packets locally. No spoofed packets are transmitted onto the network.
+Note: This is an illustrative dashboard representation. The incident is generated using synthetic ARP packet objects locally; no spoofed packets are transmitted onto the network
 ## Features
 
 - Live ARP packet capture using Scapy and Npcap on Windows.
