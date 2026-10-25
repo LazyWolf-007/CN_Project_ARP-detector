@@ -1,117 +1,178 @@
-# 🛡️ ARP Spoofing Detector
+# ARP Spoofing Detector
 
-> Real-time ARP spoofing detection tool with a live Rich terminal UI — built as part of a cybersecurity portfolio.
+A Python-based ARP monitoring and anomaly-detection tool that captures observable ARP traffic, maintains an IP-to-MAC reference table, and flags conflicting mappings through a terminal dashboard.
 
-Monitors ARP traffic on a given network interface, maintains a reference ARP table, and raises alerts whenever an IP is claimed by a new MAC address — a classic indicator of a Man-in-the-Middle (MITM) attack.
+The project supports two workflows:
 
----
+- **Live monitoring:** passively observes ARP traffic available to the selected network interface.
+- **Demo mode:** processes synthetic ARP packet objects locally to demonstrate the mapping-conflict detection logic without transmitting packets onto a network.
 
-## 📸 Demo
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                   🛡️  ARP SPOOFING DETECTOR                         │
-├──────────────────────────────────────┬──────────────────────────────┤
-│  📡 ARP Table (Reference)            │  📊 Statistics               │
-│  ┌──────────────┬───────────────┐    │   Interface : eth0           │
-│  │ IP Address   │ MAC Address   │    │   Mode      : Active         │
-│  │ 192.168.1.1  │ aa:bb:cc:...  │    │   Uptime    : 00:03:21       │
-│  │ 192.168.1.42 │ de:ad:be:...  │    │   Packets   : 214            │
-│  └──────────────┴───────────────┘    │   Hosts     : 7              │
-│                                      │   Alerts    : 1              │
-│  🚨 Detected Incidents               └──────────────────────────────┤
-│  ┌────┬──────────────┬────────────────────────────────────────┐     │
-│  │ #  │ IP           │ Spoofed MAC                            │     │
-│  │ 1  │ 192.168.1.1  │ de:ad:be:ef:00:01 (was aa:bb:cc:...)  │     │
-│  └────┴──────────────┴────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────────────┘
-```
+📊 Terminal Dashboard — Example Output
 
----
+The detector provides a terminal dashboard for monitoring observed ARP traffic, maintaining IP-to-MAC reference mappings, and displaying potential conflicts.
 
-## 🚀 Installation
+╔══════════════════════════ ARP SPOOFING DETECTOR ══════════════════════════╗
+║                            SIMULATION MODE                               ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║ ARP TABLE (REFERENCE)                         STATISTICS                  ║
+║                                                                           ║
+║ IP Address       MAC Address                 Interface: SIMULATION        ║
+║ 198.51.100.10    02:00:00:00:00:01           Mode: SIMULATION             ║
+║                                               ARP Packets: 2              ║
+║                                               Hosts: 1                    ║
+║                                               Alerts: 1                   ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║ DETECTED INCIDENTS                                                        ║
+║                                                                           ║
+║ IP:          198.51.100.10                                                ║
+║ Known MAC:   02:00:00:00:00:01                                            ║
+║ Observed MAC:02:00:00:00:00:02                                            ║
+║ Type:        Potential IP/MAC Conflict                                    ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║ ARP PACKET LOG                                                            ║
+║ [SIMULATION] Initial mapping recorded                                     ║
+║ [SIMULATION] Conflicting mapping detected                                ║
+╚═══════════════════════════════════════════════════════════════════════════╝
 
-```bash
-git clone https://github.com/salemkora/arp-detector
-cd arp-detector
-pip install -r requirements.txt
-```
+Note: This is a text illustration of the dashboard, not a literal terminal screenshot. The example incident is generated using synthetic packets locally. No spoofed packets are transmitted onto the network.
+## Features
 
-> ⚠️ Requires Python 3.8+ and root/sudo privileges (raw socket capture).
+- Live ARP packet capture using Scapy and Npcap on Windows.
+- IP-to-MAC reference table with first-seen and last-updated timestamps.
+- Potential-conflict detection when the same IP address is observed with a different MAC address.
+- Rich terminal dashboard with packet statistics, host mappings, incident records, and packet logs.
+- Alert logging and optional JSON incident-report export.
+- Offline synthetic demo for repeatable detection demonstrations.
 
----
+## Technology Stack
 
-## 💻 Usage
+| Technology | Purpose |
+|---|---|
+| Python | Application logic |
+| Scapy | ARP packet capture and packet-object construction |
+| Rich | Terminal dashboard |
+| Npcap | Packet capture support on Windows |
+| Git and GitHub | Version control and collaboration |
 
-```bash
-# Basic usage
-sudo python detector.py --interface eth0
+## Requirements
 
-# With log file
-sudo python detector.py -i eth0 --log alerts.log
+- Python 3.12 recommended for this project.
+- Windows for the commands below.
+- Npcap installed for live packet capture.
+- Administrative privileges may be required for live packet capture.
+- Dependencies listed in `requirements.txt`.
 
-# Passive mode (listen only, no active response)
-sudo python detector.py -i eth0 --passive
+## Installation
 
-# Verbose mode (show all ARP packets in log panel)
-sudo python detector.py -i eth0 --verbose
+Clone the repository:
 
-# Export JSON report on exit (Ctrl+C)
-sudo python detector.py -i eth0 --export report.json
-
-# Full options
-sudo python detector.py -i eth0 --log alerts.log --verbose --export report.json
-```
-
----
-
-## 🔧 Features
-
-- [x] Real-time ARP packet capture via Scapy
-- [x] Reference ARP table (IP → MAC mapping)
-- [x] Anomaly detection: same IP claimed by two different MACs
-- [x] Live Rich UI: ARP table, incident list, statistics panel
-- [x] Timestamped alert logging to file
-- [x] Alert deduplication (no log spam for repeated events)
-- [x] Passive mode (listen only) vs Active mode
-- [x] Verbose mode: all packets shown in live log panel
-- [x] JSON incident report export on exit
-- [x] Clean exit with Ctrl+C
-
----
-
-## 📁 Project Structure
-
-```
-arp-detector/
-├── detector.py       # Entry point — args, validation, launch
-├── arp_monitor.py    # Core detection logic + Rich UI
-├── alerts.py         # Alert model and file logger
-├── requirements.txt
-└── README.md
+```powershell
+git clone https://github.com/LazyWolf-007/CN_Project_ARP-detector.git
+cd CN_Project_ARP-detector
 ```
 
----
+Create and activate a virtual environment:
 
-## 🧠 How it works
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-1. Scapy sniffs all ARP packets on the specified interface (filter: `arp`)
-2. For each ARP request/reply, the tool extracts the sender IP and MAC
-3. The IP→MAC mapping is stored in an in-memory reference table
-4. If a known IP appears with a **different** MAC address → alert raised
-5. Alert is logged (file), displayed in the Rich UI, and deduplicated
+Install dependencies:
 
-**Why this matters:** ARP spoofing is the foundation of most LAN-based MITM attacks (Ettercap, arpspoof, Bettercap). A tool like this would have caught those attacks in real time.
+```powershell
+python -m pip install -r requirements.txt
+```
 
----
+## Running the Detector
 
-## ⚠️ Disclaimer
+### 1. Offline Demo Mode
 
-For **educational and legal use only**. Only run on networks you own or have explicit written permission to monitor. The author is not responsible for any misuse.
+Run the synthetic demonstration:
 
----
+```powershell
+python detector.py --demo --passive --verbose
+```
 
-## 👤 Author
+Demo mode constructs synthetic ARP packet objects and passes them through the monitor's packet-processing function. The scenario first establishes a reference IP-to-MAC mapping, then introduces a different MAC for the same IP.
 
-**Salem KORA** — Bachelor Cybersécurité & Ethical Hacking, EFREI Bordeaux  
-[GitHub](https://github.com/salemkora) · [LinkedIn](https://linkedin.com/in/salemkora)
+Expected behavior:
+
+- Two synthetic packet objects are processed.
+- One host is added to the reference table.
+- A potential IP-to-MAC conflict is detected.
+- One incident appears in the dashboard.
+
+**Important:** Demo mode is a simulation. It does not transmit spoofed packets, alter other devices, or demonstrate a real network attack. Simulation results must not be presented as live network observations.
+
+### 2. Live Passive Monitoring
+
+Select a network interface available on your computer. On many Windows systems, the adapter name is `Wi-Fi`, while its hardware description may be something like `Intel(R) Wi-Fi 6 AX203`.
+
+To inspect adapters:
+
+```powershell
+Get-NetAdapter | Format-List Name, InterfaceDescription, Status, InterfaceGuid
+```
+
+Start the detector using the interface name accepted by the application:
+
+```powershell
+python detector.py --interface "Intel(R) Wi-Fi 6 AX203" --passive --verbose
+```
+
+Replace the interface name with the correct one for your machine.
+
+The live dashboard displays ARP packets visible to the selected interface, observed IP-to-MAC mappings, packet statistics, and potential-conflict alerts.
+
+**Network visibility limitation:** Wi-Fi client isolation, VLAN segmentation, access-point behavior, and packet-capture restrictions may prevent the laptop from observing ARP traffic exchanged between other devices. An active capture session does not guarantee visibility of all network traffic.
+
+### Optional Arguments
+
+| Argument | Purpose |
+|---|---|
+| `-i`, `--interface` | Select the live-capture interface |
+| `-l`, `--log` | Specify the alert log file |
+| `--passive` | Select passive monitoring mode |
+| `--verbose` | Enable detailed packet logging |
+| `--export FILE` | Export an incident report to JSON on exit |
+| `--demo` | Run the offline synthetic demonstration |
+
+Use:
+
+```powershell
+python detector.py --help
+```
+
+to inspect the available command-line options.
+
+## How Detection Works
+
+1. Scapy captures an ARP packet or the demo supplies a synthetic packet object.
+2. The monitor extracts the sender IP address and sender MAC address.
+3. The monitor checks the IP against its in-memory reference table.
+4. A new IP-to-MAC mapping is stored as an observation.
+5. If a previously observed IP appears with a different MAC, the monitor records a potential-conflict alert.
+
+### Important Detection Limitations
+
+- The first observed mapping is not independently verified as trustworthy.
+- A MAC-address change can have legitimate causes, so a conflict is not conclusive proof of spoofing.
+- The detector only sees packets available to its capture interface.
+- Reliable live-attack detection and false-positive performance require additional testing.
+- The current project does not implement automatic network blocking or attack prevention.
+
+## Project Structure
+
+```text
+CN_Project_ARP-detector/
+├── detector.py       # CLI arguments and application entry point
+├── arp_monitor.py    # Packet processing, detection, capture, and dashboard
+├── alerts.py         # Alert records, logging, and deduplication
+├── requirements.txt  # Python dependencies
+├── COMMANDS.md       # Development command reference
+└── README.md         # Project documentation
+```
+
+## Responsible
