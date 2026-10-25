@@ -13,7 +13,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from scapy.all import ARP, conf, sniff
+from scapy.all import ARP, Ether, conf, sniff
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
@@ -215,12 +215,14 @@ class ARPMonitor:
         passive: bool = False,
         verbose: bool = False,
         export_file: str = None,
+        demo: bool = False,
     ):
         self.interface = interface
         self.alert_manager = alert_manager
         self.passive = passive
         self.verbose = verbose
         self.export_file = export_file
+        self.demo = demo
 
         self.arp_table = {}       # IP -> {mac, first_seen, last_seen}
         self.alerts = []
@@ -237,19 +239,23 @@ class ARPMonitor:
             "capture_status": "Starting",
         }
 
-        try:
-            self.capture_interface = resolve_interface(interface)
-        except ValueError as exc:
-            console.print(f"[bold red]Interface resolution failed:[/bold red]\n{exc}")
-            raise SystemExit(1) from exc
+        if self.demo:
+            self.capture_interface = None
+            self.display_interface = "SIMULATION (offline)"
+        else:
+            try:
+                self.capture_interface = resolve_interface(interface)
+            except ValueError as exc:
+                console.print(
+                    f"[bold red]Interface resolution failed:[/bold red]\n{exc}"
+                )
+                raise SystemExit(1) from exc
 
-        # Use the resolved Scapy interface object's friendly description in
-        # the UI, while retaining the supplied value for Alert records.
-        self.display_interface = (
-            getattr(self.capture_interface, "description", None)
-            or getattr(self.capture_interface, "name", None)
-            or interface
-        )
+            self.display_interface = (
+                getattr(self.capture_interface, "description", None)
+                or getattr(self.capture_interface, "name", None)
+                or interface
+            )
 
     def _process_packet(self, packet):
         if not packet.haslayer(ARP):
@@ -325,6 +331,39 @@ class ARPMonitor:
             # automatically trusting the new MAC.
             self.alert_manager.record(alert)
 
+    def _run_demo(self):
+        """Process synthetic ARP packets locally; never transmit them."""
+        console.print(
+            "[bold yellow]SIMULATION / NOT REAL NETWORK TRAFFIC[/bold yellow]"
+        )
+
+        synthetic_ip = "198.51.100.10"
+        original_mac = "02:00:00:00:00:01"
+        conflicting_mac = "02:00:00:00:00:02"
+
+        # Establish a synthetic reference mapping.
+        first_packet = Ether() / ARP(
+            op=2,
+            psrc=synthetic_ip,
+            hwsrc=original_mac,
+        )
+        self._process_packet(first_packet)
+
+        # Simulate a conflicting claim for the same IP.
+        second_packet = Ether() / ARP(
+            op=2,
+            psrc=synthetic_ip,
+            hwsrc=conflicting_mac,
+        )
+        self._process_packet(second_packet)
+
+        with self.lock:
+            self.stats["capture_status"] = "Simulation complete"
+            self.verbose_log.append(
+                "[SIMULATION] Two synthetic ARP packet objects processed."
+            )
+            self.verbose_log = self.verbose_log[-200:]   
+
     def _sniff_thread(self):
         try:
             with self.lock:
@@ -358,13 +397,21 @@ class ARPMonitor:
             console.print(f"[bold red]Capture failed: {message}[/bold red]")
 
     def start(self):
-        mode_label = "Passive" if self.passive else "Active (detection only)"
-        sniffer = threading.Thread(
-            target=self._sniff_thread,
-            name="arp-capture",
-            daemon=True,
-        )
-        sniffer.start()
+        if self.demo:
+            mode_label = "SIMULATION - NOT REAL NETWORK TRAFFIC"
+            with self.lock:
+                self.stats["capture_status"] = "Simulation ready"
+            self._run_demo()
+        else:
+            mode_label = (
+                "Passive" if self.passive else "Active (detection only)"
+            )
+            sniffer = threading.Thread(
+                target=self._sniff_thread,
+                name="arp-capture",
+                daemon=True,
+            )
+            sniffer.start()
 
         def handle_exit(_sig, _frame):
             self._stop_event.set()
@@ -373,7 +420,6 @@ class ARPMonitor:
             console.print("\n[bold green]Monitoring stopped.[/bold green]")
             raise SystemExit(0)
 
-        # Signal handlers must be installed from Python's main thread.
         signal.signal(signal.SIGINT, handle_exit)
         if hasattr(signal, "SIGTERM"):
             try:
@@ -389,10 +435,9 @@ class ARPMonitor:
             ) as live:
                 while not self._stop_event.is_set():
                     with self.lock:
-                        # Copy mutable state while locked so the UI does not
-                        # iterate over dictionaries/lists during packet updates.
                         arp_snapshot = {
-                            ip: info.copy() for ip, info in self.arp_table.items()
+                            ip: info.copy()
+                            for ip, info in self.arp_table.items()
                         }
                         alerts_snapshot = list(self.alerts)
                         stats_snapshot = self.stats.copy()

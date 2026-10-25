@@ -1,12 +1,14 @@
+
 #!/usr/bin/env python3
 """
 ARP Spoofing Detector — detector.py
-Entry point: argument parsing, interface validation, launch.
+Entry point: argument parsing, interface validation, and launch.
 """
 
 import argparse
-import sys
 import os
+import sys
+
 from arp_monitor import ARPMonitor
 from alerts import AlertManager
 
@@ -14,43 +16,50 @@ from alerts import AlertManager
 def parse_args():
     parser = argparse.ArgumentParser(
         prog="arp-detector",
-        description="Real-time ARP spoofing detector with Rich UI",
+        description="ARP spoofing detector with a Rich terminal dashboard",
         formatter_class=argparse.RawTextHelpFormatter,
     )
+
     parser.add_argument(
         "-i", "--interface",
-        required=True,
-        help="Network interface to monitor (e.g. eth0, ens33)"
+        help="Network interface to monitor in live mode",
     )
     parser.add_argument(
         "-l", "--log",
         default="alerts.log",
-        help="Log file for alerts (default: alerts.log)"
+        help="Log file for alerts (default: alerts.log)",
     )
     parser.add_argument(
         "--passive",
         action="store_true",
-        help="Passive mode: listen only, no active network alerts"
+        help="Listen only; do not perform network enforcement",
     )
     parser.add_argument(
         "--export",
         metavar="FILE",
-        help="Export incident report to JSON file on exit"
+        help="Export incident report to JSON on exit",
     )
     parser.add_argument(
         "--verbose",
         action="store_true",
-        help="Show all ARP packets, not just anomalies"
+        help="Show observed ARP packets in the dashboard",
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Run an isolated synthetic demonstration; transmit no packets",
+    )
+
+    args = parser.parse_args()
+
+    if not args.demo and not args.interface:
+        parser.error("--interface is required unless --demo is used")
+
+    return args
 
 
-
-def check_root():
-    """Check whether the process has elevated privileges."""
-    import os
-    import sys
-
+def check_privileges():
+    """Warn if live packet capture may lack required permissions."""
     if os.name == "nt":
         try:
             import ctypes
@@ -62,24 +71,29 @@ def check_root():
 
     if not is_admin:
         print(
-            "Warning: Not running with elevated privileges. "
-            "Packet capture may fail."
+            "Warning: not running with elevated privileges. "
+            "Live packet capture may fail.",
+            file=sys.stderr,
         )
-
 
 
 def main():
     args = parse_args()
-    check_root()
+
+    if not args.demo:
+        check_privileges()
 
     alert_manager = AlertManager(log_file=args.log)
+
     monitor = ARPMonitor(
-        interface=args.interface,
+        interface=args.interface or "SIMULATION",
         alert_manager=alert_manager,
         passive=args.passive,
         verbose=args.verbose,
         export_file=args.export,
+        demo=args.demo,
     )
+
     monitor.start()
 
 
